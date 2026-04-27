@@ -1,269 +1,179 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>마음 날씨 기록장</title>
+  <!-- Tailwind CSS 로드 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Noto Sans KR 폰트 로드 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary-blue: #0077b6;
-      --secondary-blue: #00b4d8;
-      --light-blue: #caf0f8;
-      --bg-color: #f8f9fa;
-      --white: #ffffff;
+    body { 
+      font-family: 'Noto Sans KR', sans-serif; 
     }
-
-    body {
-      font-family: 'Noto Sans KR', sans-serif;
-      background-color: var(--light-blue);
-      margin: 0;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+    /* 모달이 떴을 때 배경 스크롤 방지 */
+    .modal-active { 
+      overflow: hidden; 
     }
-
-    .app-container {
-      background: var(--white);
-      width: 100%;
-      max-width: 480px;
-      border-radius: 24px;
-      box-shadow: 0 10px 30px rgba(0, 119, 182, 0.15);
-      padding: 35px;
-      box-sizing: border-box;
-      position: relative;
-    }
-
-    .header {
-      text-align: center;
-      margin-bottom: 35px;
-    }
-
-    .header h1 {
-      color: var(--primary-blue);
-      margin: 0;
-      font-size: 28px;
-      font-weight: 700;
-    }
-
-    .header p {
-      color: #555;
-      font-size: 15px;
-      margin-top: 8px;
-    }
-
-    .input-section {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    .field-label {
-      font-weight: 700;
-      color: var(--primary-blue);
-      margin-bottom: 8px;
-      display: block;
-      font-size: 15px;
-    }
-
-    input[type="text"], select, textarea {
-      width: 100%;
-      padding: 14px 16px;
-      border: 2px solid #e1e8ed;
-      border-radius: 12px;
-      font-size: 16px;
-      font-family: inherit;
-      box-sizing: border-box;
-      transition: all 0.3s;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--secondary-blue);
-      background-color: #fcfdfe;
-    }
-
-    #reasonSection, #resultSection {
-      display: none;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px dashed #e1e8ed;
-      animation: fadeIn 0.5s ease-out forwards;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    button {
-      background: var(--primary-blue);
-      color: white;
-      border: none;
-      padding: 18px;
-      border-radius: 14px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
-      margin-top: 10px;
-      box-shadow: 0 4px 12px rgba(0, 119, 182, 0.2);
-    }
-
-    button:hover {
-      background: #023e8a;
-      transform: translateY(-2px);
-    }
-
-    .feedback-card {
-      background: #f0faff;
-      border-left: 6px solid var(--secondary-blue);
-      padding: 24px;
-      border-radius: 16px;
-      margin-top: 20px;
-      line-height: 1.8;
-      color: #333;
-      font-size: 16px;
-      white-space: pre-wrap;
-    }
-
+    /* 로딩 애니메이션 */
     .loader {
-      display: none;
-      text-align: center;
-      margin: 30px 0;
-    }
-
-    .spinner {
-      width: 44px;
-      height: 44px;
-      border: 4px solid #f3f3f3;
-      border-top: 4px solid var(--primary-blue);
+      border: 4px solid #e0f2fe;
+      border-top: 4px solid #3b82f6;
       border-radius: 50%;
+      width: 40px;
+      height: 40px;
       animation: spin 1s linear infinite;
-      display: inline-block;
     }
-
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
-<body>
+<body class="bg-sky-50 min-h-screen flex items-center justify-center p-4">
 
-<div class="app-container">
-  <div class="header">
-    <h1>💙 AI 마음 기록장</h1>
-    <p>오늘 나의 이야기를 들려주세요</p>
+  <!-- [화면 1] 메인 입력 카드 -->
+  <div id="mainCard" class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border-t-4 border-sky-400 transition-all">
+    <h1 class="text-2xl font-bold text-sky-800 mb-2 text-center">☁️ 오늘의 마음 날씨</h1>
+    <p class="text-sky-600 text-center mb-6 text-sm">지금 느끼는 감정을 솔직하게 기록해 보세요.</p>
+    
+    <div class="mb-5">
+      <label class="block text-sky-800 font-medium mb-2 text-sm">내 이름</label>
+      <input type="text" id="studentName" class="w-full px-4 py-3 rounded-xl border border-sky-100 bg-sky-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 transition" placeholder="이름을 입력하세요">
+    </div>
+    
+    <div class="mb-8">
+      <label class="block text-sky-800 font-medium mb-2 text-sm">오늘의 감정 키워드</label>
+      <input type="text" id="emotions" class="w-full px-4 py-3 rounded-xl border border-sky-100 bg-sky-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 transition" placeholder="예: 기쁨, 뿌듯함, 속상함, 기대됨">
+    </div>
+    
+    <button onclick="openReasonModal()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+      다음으로 이동
+    </button>
   </div>
 
-  <div id="mainContent">
-    <div id="step1" class="input-section">
-      <div>
-        <label class="field-label">이름</label>
-        <input type="text" id="studentName" placeholder="성함을 입력해주세요">
-      </div>
-      <div>
-        <label class="field-label">지금 기분은 어떤가요?</label>
-        <select id="emotionSelect" onchange="checkEmotionSelection()">
-          <option value="" disabled selected>감정 키워드를 선택하세요</option>
-          <option value="행복함">행복함 😊</option>
-          <option value="평온함">평온함 🌿</option>
-          <option value="걱정됨">걱정됨 😟</option>
-          <option value="슬픔">슬픔 😢</option>
-          <option value="화남">화남 😡</option>
-          <option value="뿌듯함">뿌듯함 ✨</option>
-          <option value="피곤함">피곤함 😴</option>
-        </select>
+  <!-- [화면 2] 이유를 묻는 팝업(모달) -->
+  <div id="reasonModal" class="fixed inset-0 bg-sky-900 bg-opacity-40 hidden flex items-center justify-center p-4 z-50 backdrop-blur-sm transition-opacity">
+    <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+      <h2 class="text-xl font-bold text-sky-800 mb-2">💬 무슨 일이 있었나요?</h2>
+      <p class="text-sky-600 text-sm mb-5">
+        <span id="displayEmotion" class="font-bold text-sky-700 bg-sky-100 px-2 py-0.5 rounded"></span> 감정을 느낀 이유를 들려주세요.
+      </p>
+      
+      <textarea id="reason" rows="5" class="w-full px-4 py-3 rounded-xl border border-sky-100 bg-sky-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-400 transition resize-none mb-6" placeholder="여기에 마음속 이야기를 편하게 적어주세요..."></textarea>
+      
+      <div class="flex space-x-3">
+        <button onclick="closeReasonModal()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-xl transition">취소</button>
+        <button onclick="submitData()" class="flex-1 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-xl shadow-md transition">기록 완료하기</button>
       </div>
     </div>
+  </div>
 
-    <div id="reasonSection">
-      <div class="input-section">
-        <div>
-          <label class="field-label" id="reasonLabel">무슨 일이 있었나요?</label>
-          <textarea id="reasonText" rows="4" placeholder="선생님께 마음속 이야기를 들려주세요."></textarea>
-        </div>
-        <button onclick="handleFinalSubmit()">기록하고 선생님 답장 확인하기</button>
+  <!-- [화면 3] 로딩 화면 -->
+  <div id="loadingCard" class="bg-white p-10 rounded-2xl shadow-lg w-full max-w-md text-center hidden flex-col items-center justify-center space-y-4 border-t-4 border-sky-400">
+    <div class="loader mx-auto"></div>
+    <p class="text-sky-800 font-medium">선생님이 메시지를 읽고 있어요...<br><span class="text-sm text-sky-500 font-normal">따뜻한 답장을 준비 중입니다.</span></p>
+  </div>
+
+  <!-- [화면 4] 완료 및 피드백 화면 -->
+  <div id="resultCard" class="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md border-t-4 border-sky-400 hidden">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <span class="text-3xl">💌</span>
       </div>
+      <h2 class="text-xl font-bold text-sky-800">기록이 완료되었어요!</h2>
     </div>
+    
+    <div class="bg-sky-50 p-5 rounded-xl mb-8 border border-sky-100">
+      <p class="text-xs text-sky-600 font-bold mb-2">선생님의 답장</p>
+      <p id="feedbackText" class="text-sky-900 text-sm leading-relaxed"></p>
+    </div>
+    
+    <button onclick="resetForm()" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition">
+      처음으로 돌아가기
+    </button>
   </div>
 
-  <div id="loader" class="loader">
-    <div class="spinner"></div>
-    <p style="margin-top:15px; color:var(--primary-blue); font-weight:500;">
-      AI 선생님이 내용을 읽고<br>따뜻한 답장을 쓰고 있어요...
-    </p>
-  </div>
+  <script>
+    // 모달 열기
+    function openReasonModal() {
+      const name = document.getElementById('studentName').value.trim();
+      const emotions = document.getElementById('emotions').value.trim();
 
-  <div id="resultSection">
-    <label class="field-label" style="font-size:18px;">💌 AI 선생님의 따뜻한 답장</label>
-    <div class="feedback-card" id="feedbackContent"></div>
-    <button onclick="location.reload()" style="margin-top: 25px; background: #78909c;">새로 작성하기</button>
-  </div>
-</div>
+      if (!name || !emotions) {
+        alert('이름과 오늘 느낀 감정을 모두 입력해주세요! 😊');
+        return;
+      }
 
-<script>
-  // 알려주신 Apps Script 웹 앱 URL
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAHVsDLiRcrwZCmZKaDsOzpYW4mNfO_AXqIf5_R7BzmmXW2dAQ-geDjahtHEUkX_MJ/exec";
-
-  function checkEmotionSelection() {
-    const emotion = document.getElementById('emotionSelect').value;
-    const name = document.getElementById('studentName').value;
-    if (!name) {
-      alert("이름을 먼저 입력해주셔야 기분을 물어볼 수 있어요!");
-      document.getElementById('emotionSelect').value = "";
-      return;
-    }
-    if (emotion) {
-      document.getElementById('reasonLabel').innerText = `"${emotion}" 감정을 느끼셨군요! 오늘 어떤 일이 있었나요?`;
-      document.getElementById('reasonSection').style.display = 'block';
-    }
-  }
-
-  function handleFinalSubmit() {
-    const name = document.getElementById('studentName').value;
-    const emotion = document.getElementById('emotionSelect').value;
-    const reason = document.getElementById('reasonText').value;
-
-    if (!reason.trim()) {
-      alert("이야기를 들려주셔야 선생님이 답장을 보낼 수 있어요.");
-      return;
+      document.getElementById('displayEmotion').innerText = emotions;
+      document.getElementById('reasonModal').classList.remove('hidden');
+      document.body.classList.add('modal-active');
     }
 
-    document.getElementById('mainContent').style.display = "none";
-    document.getElementById('loader').style.display = "block";
-
-    const data = { name, emotion, reason };
-
-    // 깃허브 등 외부 환경에서 구글 서버와 통신하는 코드
-    fetch(SCRIPT_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
-      },
-      body: JSON.stringify(data)
-    })
-    .then(response => response.json())
-    .then(response => {
-      showFeedback(response);
-    })
-    .catch(err => {
-      alert("서버와 연결할 수 없습니다: " + err);
-      document.getElementById('loader').style.display = "none";
-      document.getElementById('mainContent').style.display = "block";
-    });
-  }
-
-  function showFeedback(response) {
-    document.getElementById('loader').style.display = "none";
-    if (response.success) {
-      document.getElementById('feedbackContent').innerText = response.feedback;
-      document.getElementById('resultSection').style.display = "block";
-    } else {
-      alert(response.message);
-      document.getElementById('mainContent').style.display = "block";
+    // 모달 닫기
+    function closeReasonModal() {
+      document.getElementById('reasonModal').classList.add('hidden');
+      document.body.classList.remove('modal-active');
     }
-  }
-</script>
 
+    // 데이터 제출 및 구글 시트 전송
+    function submitData() {
+      const name = document.getElementById('studentName').value.trim();
+      const emotions = document.getElementById('emotions').value.trim();
+      const reason = document.getElementById('reason').value.trim();
+
+      if (!reason) {
+        alert('어떤 일이 있었는지 이유를 조금만 들려주세요! 🥺');
+        return;
+      }
+
+      // 1. 모달 닫기 & 메인 화면 숨기기
+      closeReasonModal();
+      document.getElementById('mainCard').classList.add('hidden');
+      
+      // 2. 로딩 화면 표시
+      document.getElementById('loadingCard').classList.remove('hidden');
+      document.getElementById('loadingCard').classList.add('flex');
+
+      // 3. 구글 Apps Script로 데이터 전송 (백엔드 함수 호출)
+      google.script.run
+        .withSuccessHandler(showFeedback)
+        .withFailureHandler(showError)
+        .saveEmotionData(name, emotions, reason);
+    }
+
+    // 통신 성공 시 피드백 보여주기
+    function showFeedback(response) {
+      document.getElementById('loadingCard').classList.add('hidden');
+      document.getElementById('loadingCard').classList.remove('flex');
+      
+      if (response.success) {
+        document.getElementById('feedbackText').innerText = response.feedback;
+        document.getElementById('resultCard').classList.remove('hidden');
+      } else {
+        showError(response.error);
+      }
+    }
+
+    // 통신 에러 발생 시
+    function showError(error) {
+      document.getElementById('loadingCard').classList.add('hidden');
+      document.getElementById('loadingCard').classList.remove('flex');
+      
+      alert('오류가 발생했습니다. 기록이 저장되지 않았을 수 있습니다.\n' + error);
+      document.getElementById('mainCard').classList.remove('hidden');
+    }
+
+    // 폼 초기화 (처음으로)
+    function resetForm() {
+      document.getElementById('studentName').value = '';
+      document.getElementById('emotions').value = '';
+      document.getElementById('reason').value = '';
+      
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('mainCard').classList.remove('hidden');
+    }
+  </script>
 </body>
 </html>
