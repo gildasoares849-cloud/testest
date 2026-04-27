@@ -202,6 +202,9 @@
 </div>
 
 <script>
+  // 알려주신 Apps Script 웹 앱 URL
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAHVsDLiRcrwZCmZKaDsOzpYW4mNfO_AXqIf5_R7BzmmXW2dAQ-geDjahtHEUkX_MJ/exec";
+
   function checkEmotionSelection() {
     const emotion = document.getElementById('emotionSelect').value;
     const name = document.getElementById('studentName').value;
@@ -231,25 +234,23 @@
 
     const data = { name, emotion, reason };
 
-    if (typeof google !== 'undefined' && google.script && google.script.run) {
-      google.script.run
-        .withSuccessHandler(function(response) {
-          showFeedback(response);
-        })
-        .withFailureHandler(function(err) {
-          alert("오류: " + err);
-          document.getElementById('loader').style.display = "none";
-          document.getElementById('mainContent').style.display = "block";
-        })
-        .saveToSpecificSheet(data);
-    } else {
-      setTimeout(() => {
-        showFeedback({
-          success: true, 
-          feedback: "테스트 모드입니다. AI 선생님이 작성한 3문장의 따뜻한 피드백이 이곳에 표시될 예정입니다."
-        });
-      }, 1500);
-    }
+    // 깃허브 등 외부 환경에서 구글 서버와 통신하는 코드
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain;charset=utf-8',
+      },
+      body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(response => {
+      showFeedback(response);
+    })
+    .catch(err => {
+      alert("서버와 연결할 수 없습니다: " + err);
+      document.getElementById('loader').style.display = "none";
+      document.getElementById('mainContent').style.display = "block";
+    });
   }
 
   function showFeedback(response) {
